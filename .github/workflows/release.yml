@@ -87,3 +87,11 @@ jobs:
           fi
           echo "Updating release notes for $TAG_NAME in ${{ github.repository }}..."
           gh release edit "$TAG_NAME" --repo "${{ github.repository }}" --notes-file CHANGELOG.md || true
+
+      - name: Update Repo Details
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh repo edit "${{ github.repository }}" \
+            --description "⚡ Fast, lightweight native desktop shell for WhatsApp Web built with Tauri v2, Svelte 5, and Rust" \
+            --add-topic "whatsapp,tauri,svelte,rust,desktop-app,webview2,bun,whatsapp-web,lightweight" || true
