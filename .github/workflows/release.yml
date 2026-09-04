@@ -7,7 +7,28 @@ on:
   workflow_dispatch:
 
 jobs:
+  update-notes:
+    name: Update Release Notes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update Release Body with Changelog
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          if [ -z "$TAG_NAME" ] || [ "$TAG_NAME" = "main" ]; then
+            TAG_NAME="v0.1.0"
+          fi
+          echo "Updating release notes for $TAG_NAME from CHANGELOG.md..."
+          gh release edit "$TAG_NAME" --notes-file CHANGELOG.md || true
+
   release:
+    name: Build Multi-Platform Installers
     permissions:
       contents: write
     strategy:
@@ -43,6 +64,16 @@ jobs:
       - name: Install frontend dependencies
         run: bun install
 
+      - name: Read Changelog
+        id: changelog
+        shell: bash
+        run: |
+          {
+            echo 'body<<EOF'
+            cat CHANGELOG.md
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build and Publish Release
         uses: tauri-apps/tauri-action@v0
         env:
@@ -50,7 +81,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'Waplus v__VERSION__'
-          releaseBody: 'Automated cross-platform release for Waplus v__VERSION__. See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.'
+          releaseBody: ${{ steps.changelog.outputs.body }}
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
