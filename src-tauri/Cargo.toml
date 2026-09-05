@@ -1,6 +1,6 @@
 [package]
 name = "waplus"
-version = "0.1.0"
+version = "0.1.1"
 description = "WhatsApp Fast Desktop Shell"
 authors = ["Waplus Team"]
 edition = "2021"
@@ -20,8 +20,10 @@ tauri-plugin-opener = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-autostart = "2"
 tauri-plugin-single-instance = "2"
+tauri-plugin-updater = "2"
 open = "5.3"
 url = "2"
+tokio = { version = "1", features = ["time"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

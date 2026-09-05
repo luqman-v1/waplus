@@ -4,12 +4,14 @@ mod tray;
 
 use std::path::PathBuf;
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
+use tauri_plugin_notification::NotificationExt;
+use tauri_plugin_updater::UpdaterExt;
 use url::Url;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36";
 
 #[cfg(target_os = "windows")]
-const BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,Translate,OptimizationHints,MediaRouter,EdgeShowFeatureRecommendations,PreloadMediaEngagementData,AutofillServerCommunication,CertificateTransparencyComponentUpdater,SafeBrowsing --enable-low-end-device-mode --renderer-process-limit=2 --process-per-site --disable-extensions --disable-component-extensions-with-background-pages --disable-background-networking --disable-component-update --disable-domain-reliability --disable-sync --disable-breakpad --disable-gpu-shader-disk-cache --disk-cache-size=67108864 --media-cache-size=33554432 --js-flags=--max-old-space-size=256 --optimize-for-size --expose-gc";
+const BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,Translate,OptimizationHints,MediaRouter,EdgeShowFeatureRecommendations,PreloadMediaEngagementData,AutofillServerCommunication,CertificateTransparencyComponentUpdater,SafeBrowsing --enable-features=VaapiVideoDecoder,CanvasOopRasterization --enable-gpu-rasterization --enable-zero-copy --disable-extensions --disable-component-extensions-with-background-pages --disable-component-update --disable-domain-reliability --disable-sync --disable-breakpad --disk-cache-size=536870912 --media-cache-size=268435456";
 
 const NOTIFICATION_SCRIPT: &str = r#"
 (function() {
@@ -58,38 +60,12 @@ const NOTIFICATION_SCRIPT: &str = r#"
 
         window.Notification = WaplusNotification;
 
-        // Auto Memory Reclamation when window is hidden or idle
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden && typeof window.gc === 'function') {
-                try { window.gc(); } catch (_) {}
-            }
-        });
-        setInterval(function() {
-            if (document.hidden && typeof window.gc === 'function') {
-                try { window.gc(); } catch (_) {}
-            }
-        }, 45000);
     } catch (err) {
         console.error('Waplus notification bridge init error:', err);
     }
 })();
 "#;
 
-#[cfg(target_os = "windows")]
-pub fn trim_memory() {
-    unsafe {
-        extern "system" {
-            fn GetCurrentProcess() -> isize;
-            fn SetProcessWorkingSetSize(
-                h_process: isize,
-                dw_minimum_working_set_size: usize,
-                dw_maximum_working_set_size: usize,
-            ) -> i32;
-        }
-        let handle = GetCurrentProcess();
-        SetProcessWorkingSetSize(handle, usize::MAX, usize::MAX);
-    }
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -103,6 +79,7 @@ pub fn run() {
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             tray::show_main_window(app);
         }))
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             commands::clear_session,
             commands::get_app_version
@@ -143,6 +120,20 @@ pub fn run() {
                     false
                 })
                 .build()?;
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                if let Ok(updater) = handle.updater() {
+                    if let Ok(Some(update)) = updater.check().await {
+                        let _ = handle
+                            .notification()
+                            .builder()
+                            .title("Waplus Update Available")
+                            .body(format!("Version {} is available to install.", update.version))
+                            .show();
+                    }
+                }
+            });
 
             Ok(())
         })
@@ -152,8 +143,6 @@ pub fn run() {
                 if let WindowEvent::CloseRequested { api, .. } = event {
                     api.prevent_close();
                     let _ = window.hide();
-                    #[cfg(target_os = "windows")]
-                    trim_memory();
                 }
             }
         })

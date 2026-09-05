@@ -1,6 +1,6 @@
 {
   "name": "waplus",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fast & lightweight desktop shell for WhatsApp Web",
   "type": "module",
   "scripts": {
@@ -16,7 +16,8 @@
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-autostart": "^2.5.1",
     "@tauri-apps/plugin-notification": "^2.4.0",
-    "@tauri-apps/plugin-opener": "^2"
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-updater": "^2.11.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.6",

@@ -10,24 +10,53 @@ A high-performance, resource-efficient native desktop shell for WhatsApp Web bui
   <strong>Fast. Lightweight. Privacy-focused.</strong>
 </p>
 
+<p align="center">
+  <a href="https://github.com/luqman-v1/waplus/releases/latest">
+    <img src="https://img.shields.io/github/v/release/luqman-v1/waplus?color=25D366&label=Latest%20Release&style=for-the-badge" alt="Latest Release" />
+  </a>
+  <a href="https://github.com/luqman-v1/waplus/releases">
+    <img src="https://img.shields.io/github/downloads/luqman-v1/waplus/total?color=128C7E&label=Downloads&style=for-the-badge" alt="Total Downloads" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="#-download"><strong>⚡ Download Ready-to-use App</strong></a> •
+  <a href="#-features">Features</a> •
+  <a href="#-getting-started">Development</a>
+</p>
+
+---
+
+## 📥 Download
+
+Tidak perlu build atau compile sendiri! Anda bisa langsung mengunduh installer siap pakai dari halaman **[GitHub Releases](https://github.com/luqman-v1/waplus/releases/latest)**:
+
+| Platform | Format File | Link Unduh |
+|---|---|---|
+| **Windows 10 / 11** | Installer (`.exe` / `.msi`) | [⬇️ Download for Windows](https://github.com/luqman-v1/waplus/releases/latest) |
+| **macOS** | Disk Image (`.dmg`) | [⬇️ Download for macOS](https://github.com/luqman-v1/waplus/releases/latest) |
+| **Linux** | Debian / AppImage (`.deb` / `.AppImage`) | [⬇️ Download for Linux](https://github.com/luqman-v1/waplus/releases/latest) |
+
+> 💡 **Fitur Auto-Update**: Setelah terpasang, aplikasi dapat memperbarui dirinya sendiri secara otomatis saat ada versi baru dirilis tanpa perlu mengunduh ulang secara manual.
+
 ---
 
 ## ✨ Features
 
 - 🚀 **Ultra-Low Memory Footprint**: Optimized Chromium WebView2 runtime consuming only ~250–350 MB RAM (compared to ~1,000+ MB on Electron / multi-process wrappers).
 - ⚡ **Instant Warm Resume (< 200 ms)**: Minimizes directly to the Windows System Tray on close and restores instantly.
+- 🔄 **Auto-Update System**: In-app one-click update checking and downloading powered by GitHub Releases.
 - 🔒 **Encrypted Persistent Session**: Session data, credentials, and local storage persist securely across application restarts and OS reboots.
 - 🌐 **External Link Interception**: External hyperlinks automatically open in your default operating system browser, keeping your WhatsApp shell clean and focused.
 - 🔔 **Native Notification Bridge**: Background notification support with auto-granted permissions.
-- 🎨 **Svelte 5 Runes & Modern UI**: Fast, responsive on-demand settings window with light/dark appearance controls and deep session clearing.
+- 🎨 **Modern Settings UI**: Fast, responsive on-demand settings window with light/dark appearance controls and deep session clearing.
 - 🖼️ **Custom Branded Icon**: Native squircle icon with transparency across Windows Taskbar and System Tray.
-
 ---
 
 ## 🛠️ Tech Stack
 
 - **Desktop Framework**: [Tauri v2](https://v2.tauri.app/)
-- **Backend Language**: [Rust](https://www.rust-lang.org/) (with Win32 memory working-set trimming)
+- **Backend Language**: [Rust](https://www.rust-lang.org/)
 - **Frontend Framework**: [Svelte 5](https://svelte.dev/) + [SvelteKit](https://kit.svelte.dev/) + [TypeScript](https://www.typescriptlang.org/)
 - **Package Manager & Runtime**: [Bun](https://bun.sh/)
 - **Bundler**: [Vite](https://vitejs.dev/)
@@ -50,7 +79,7 @@ Before running or building Waplus, make sure you have installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/waplus.git
+git clone https://github.com/luqman-v1/waplus.git
 cd waplus
 ```
 

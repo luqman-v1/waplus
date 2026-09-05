@@ -24,6 +24,8 @@ src-tauri/gen/schemas/
 .env
 .env.*
 !.env.example
+*.key
+*.pub
 
 # IDE
 .vscode/*

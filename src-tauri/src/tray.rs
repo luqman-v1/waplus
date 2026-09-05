@@ -15,8 +15,6 @@ pub fn show_main_window<R: Runtime>(app: &AppHandle<R>) {
 pub fn hide_main_window<R: Runtime>(app: &AppHandle<R>) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.hide();
-        #[cfg(target_os = "windows")]
-        crate::trim_memory();
     }
 }
 

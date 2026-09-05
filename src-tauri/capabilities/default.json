@@ -18,6 +18,7 @@
     "core:webview:default",
     "opener:default",
     "notification:default",
-    "autostart:default"
+    "autostart:default",
+    "updater:default"
   ]
 }
