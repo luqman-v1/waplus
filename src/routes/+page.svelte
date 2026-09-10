@@ -9,7 +9,7 @@
   const appWindow = getCurrentWindow();
   let isClearing = $state(false);
   let clearSuccess = $state(false);
-  let appVersion = $state('0.1.0');
+  let appVersion = $state('0.1.2');
 
   // Update states
   let updateStatus = $state<'idle' | 'checking' | 'up-to-date' | 'available' | 'downloading' | 'ready' | 'error'>('idle');

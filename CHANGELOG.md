@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-09-10
+
+### 🔔 Native Desktop Notification Bridge
+- **Direct Tauri IPC Bridge**: Intercepts `new window.Notification()` and dispatches payloads to Tauri's `plugin:notification|notify` command for native Windows Toast delivery.
+- **WhatsApp Web Remote Capabilities**: Added `whatsapp.json` capability scoped to `https://web.whatsapp.com/**` with permissions for desktop notifications and openers.
+- **Service Worker & Permissions Interceptor**: Intercepts `ServiceWorkerRegistration.prototype.showNotification` and `navigator.permissions.query({ name: 'notifications' })` ensuring background alert compatibility.
+- **Automated E2E Contract Tests**: Added test suite validating notification script integrity, DOM EventTarget listeners, and Tauri IPC payload dispatch.
+
+### 🐛 Bug Fixes & Shell Improvements
+- **Safe Session Clearing**: Refactored `clear_session` command to utilize native `window.clear_all_browsing_data()`, resolving Windows file-locking permission errors (`os error 5 / 32`).
+- **External Link Interceptor**: Added `.on_new_window()` handler to intercept `target="_blank"` and `window.open()` popups, opening all external URLs in the default OS browser while denying unmanaged webviews.
+- **Developer Tooling**: Added root `Makefile` providing quick targets for `run`, `dev`, `build`, `check`, and `test`.
+
 ## [0.1.1] - 2026-09-05
 
 ### 🚀 Performance & Responsiveness

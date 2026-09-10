@@ -1,0 +1,18 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "whatsapp",
+  "description": "Capability for WhatsApp Web remote origin",
+  "windows": ["main"],
+  "remote": {
+    "urls": [
+      "https://web.whatsapp.com/**",
+      "https://*.whatsapp.com/**",
+      "https://*.whatsapp.net/**"
+    ]
+  },
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "notification:default"
+  ]
+}

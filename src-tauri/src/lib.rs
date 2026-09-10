@@ -1,4 +1,4 @@
-// Waplus - WhatsApp Fast Desktop Shell (v0.1.0)
+// Waplus - WhatsApp Fast Desktop Shell (v0.1.2)
 mod commands;
 mod tray;
 
@@ -16,21 +16,90 @@ const BROWSER_ARGS: &str = "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreen
 const NOTIFICATION_SCRIPT: &str = r#"
 (function() {
     try {
-        const OrigNotification = window.Notification;
-        function WaplusNotification(title, options) {
-            try {
-                if (OrigNotification) {
-                    return new OrigNotification(title, options);
-                }
-            } catch (e) {}
-            return {
-                title: title,
-                options: options,
-                addEventListener: function() {},
-                removeEventListener: function() {},
-                close: function() {}
-            };
+        function invokeIpc(cmd, args) {
+            if (window.__TAURI_INTERNALS__ && typeof window.__TAURI_INTERNALS__.invoke === 'function') {
+                return window.__TAURI_INTERNALS__.invoke(cmd, args);
+            }
+            return Promise.reject(new Error('Tauri IPC not available'));
         }
+
+        function WaplusNotification(title, options) {
+            const opts = options || {};
+            this.title = String(title || '');
+            this.body = opts.body ? String(opts.body) : '';
+            this.tag = opts.tag ? String(opts.tag) : '';
+            this.icon = opts.icon ? String(opts.icon) : '';
+            this.silent = Boolean(opts.silent);
+            this.data = opts.data || null;
+
+            this.onclick = null;
+            this.onclose = null;
+            this.onerror = null;
+            this.onshow = null;
+
+            this._listeners = {};
+
+            const notifyPayload = {
+                options: {
+                    title: this.title,
+                    body: this.body || undefined,
+                    silent: this.silent
+                }
+            };
+
+            invokeIpc('plugin:notification|notify', notifyPayload)
+                .then(() => {
+                    const showEvent = { type: 'show', target: this };
+                    if (typeof this.onshow === 'function') {
+                        try { this.onshow(showEvent); } catch (_) {}
+                    }
+                    this._dispatch('show', showEvent);
+                })
+                .catch((err) => {
+                    console.warn('Waplus notification error:', err);
+                    const errorEvent = { type: 'error', error: err, target: this };
+                    if (typeof this.onerror === 'function') {
+                        try { this.onerror(errorEvent); } catch (_) {}
+                    }
+                    this._dispatch('error', errorEvent);
+                });
+        }
+
+        WaplusNotification.prototype.addEventListener = function(type, listener) {
+            if (typeof listener !== 'function') return;
+            if (!this._listeners[type]) this._listeners[type] = [];
+            this._listeners[type].push(listener);
+        };
+
+        WaplusNotification.prototype.removeEventListener = function(type, listener) {
+            if (!this._listeners[type]) return;
+            this._listeners[type] = this._listeners[type].filter(function(l) {
+                return l !== listener;
+            });
+        };
+
+        WaplusNotification.prototype._dispatch = function(type, event) {
+            const listeners = this._listeners[type];
+            if (Array.isArray(listeners)) {
+                listeners.forEach((fn) => {
+                    try { fn.call(this, event); } catch (_) {}
+                });
+            }
+        };
+
+        WaplusNotification.prototype.dispatchEvent = function(event) {
+            if (!event || !event.type) return true;
+            this._dispatch(event.type, event);
+            return true;
+        };
+
+        WaplusNotification.prototype.close = function() {
+            const closeEvent = { type: 'close', target: this };
+            if (typeof this.onclose === 'function') {
+                try { this.onclose(closeEvent); } catch (_) {}
+            }
+            this._dispatch('close', closeEvent);
+        };
 
         Object.defineProperty(WaplusNotification, 'permission', {
             get: function() { return 'granted'; },
@@ -41,25 +110,40 @@ const NOTIFICATION_SCRIPT: &str = r#"
 
         WaplusNotification.requestPermission = function(callback) {
             if (typeof callback === 'function') {
-                callback('granted');
+                try { callback('granted'); } catch (_) {}
             }
             return Promise.resolve('granted');
         };
 
-        if (OrigNotification) {
-            try {
-                Object.defineProperty(OrigNotification, 'permission', {
-                    get: function() { return 'granted'; },
-                    set: function(_) {},
-                    configurable: true,
-                    enumerable: true
-                });
-                OrigNotification.requestPermission = WaplusNotification.requestPermission;
-            } catch (_) {}
-        }
+        WaplusNotification.maxActions = 2;
 
         window.Notification = WaplusNotification;
 
+        if (window.ServiceWorkerRegistration && window.ServiceWorkerRegistration.prototype) {
+            window.ServiceWorkerRegistration.prototype.showNotification = function(title, options) {
+                try {
+                    new WaplusNotification(title, options);
+                } catch (_) {}
+                return Promise.resolve();
+            };
+        }
+
+        if (navigator.permissions && typeof navigator.permissions.query === 'function') {
+            const origQuery = navigator.permissions.query.bind(navigator.permissions);
+            navigator.permissions.query = function(parameters) {
+                if (parameters && parameters.name === 'notifications') {
+                    return Promise.resolve({
+                        state: 'granted',
+                        name: 'notifications',
+                        onchange: null,
+                        addEventListener: function() {},
+                        removeEventListener: function() {},
+                        dispatchEvent: function() { return true; }
+                    });
+                }
+                return origQuery(parameters);
+            };
+        }
     } catch (err) {
         console.error('Waplus notification bridge init error:', err);
     }
@@ -118,6 +202,18 @@ pub fn run() {
                     }
                     let _ = open::that(url.as_str());
                     false
+                })
+                .on_new_window(|url, _features| {
+                    if let Some(host) = url.host_str() {
+                        if host == "web.whatsapp.com"
+                            || host.ends_with(".whatsapp.com")
+                            || host.ends_with(".whatsapp.net")
+                        {
+                            return tauri::webview::NewWindowResponse::Allow;
+                        }
+                    }
+                    let _ = open::that(url.as_str());
+                    tauri::webview::NewWindowResponse::Deny
                 })
                 .build()?;
             let handle = app.handle().clone();

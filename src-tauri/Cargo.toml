@@ -1,6 +1,6 @@
 [package]
 name = "waplus"
-version = "0.1.1"
+version = "0.1.2"
 description = "WhatsApp Fast Desktop Shell"
 authors = ["Waplus Team"]
 edition = "2021"
