@@ -62,7 +62,8 @@
 }
 
 /* Force Dark / Light classes if user overrides */
-:global(body.theme-dark) {
+:root.theme-dark,
+body.theme-dark {
   --bg-app: #0c1317;
   --bg-surface: #111b21;
   --bg-surface-hover: #202c33;
@@ -79,9 +80,16 @@
   --wa-green: #00a884;
   --wa-teal: #008069;
   --wa-dark-teal: #005c4b;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
 }
 
-:global(body.theme-light) {
+:root.theme-light,
+body.theme-light {
   --bg-app: #f0f2f5;
   --bg-surface: #ffffff;
   --bg-surface-hover: #f7f9fa;
@@ -98,6 +106,12 @@
   --wa-green: #25d366;
   --wa-teal: #128c7e;
   --wa-dark-teal: #075e54;
+  --danger: #e53e3e;
+  --danger-hover: #c53030;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
 }
 
 * {

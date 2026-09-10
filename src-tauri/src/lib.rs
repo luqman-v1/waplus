@@ -1,4 +1,4 @@
-// Waplus - WhatsApp Fast Desktop Shell (v0.1.2)
+// Waplus - WhatsApp Fast Desktop Shell (v0.1.3)
 mod commands;
 mod tray;
 
@@ -166,7 +166,8 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             commands::clear_session,
-            commands::get_app_version
+            commands::get_app_version,
+            commands::set_theme
         ])
         .setup(|app| {
             // Setup system tray
@@ -179,7 +180,8 @@ pub fn run() {
 
             #[cfg(target_os = "windows")]
             let builder = WebviewWindowBuilder::new(app, "main", whatsapp_url)
-                .additional_browser_args(BROWSER_ARGS);
+                .additional_browser_args(BROWSER_ARGS)
+                .drag_and_drop(false);
             #[cfg(not(target_os = "windows"))]
             let builder = WebviewWindowBuilder::new(app, "main", whatsapp_url);
 
@@ -191,6 +193,7 @@ pub fn run() {
                 .user_agent(USER_AGENT)
                 .data_directory(webview_data_dir)
                 .initialization_script(NOTIFICATION_SCRIPT)
+                .disable_drag_drop_handler()
                 .on_navigation(|url: &Url| {
                     if let Some(host) = url.host_str() {
                         if host == "web.whatsapp.com"

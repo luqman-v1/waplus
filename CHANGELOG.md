@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-09-10
+
+### 🖼️ Native HTML5 Drag-and-Drop
+- **Two-Layer Drop Protection**: Disabled outer Win32 HWND OLE interception via `.drag_and_drop(false)` and enabled native WebView2 file drop handling via `.disable_drag_drop_handler()`.
+- **Seamless Media Uploads**: Dragging images, videos, and documents directly from Windows Explorer into WhatsApp Web now triggers the native upload preview and caption dialog.
+
+### 🎨 Appearance & Theme Synchronization
+- **Fixed Light Theme Switching**: Corrected invalid `:global(...)` CSS selector in global `app.css` to standard `:root.theme-light, body.theme-light` with high specificity, allowing Light mode to override OS-level Dark mode.
+- **Cross-Window Theme Sync**: Added `set_theme` Tauri IPC command that synchronizes theme state across the native window, Settings UI, and WhatsApp Web's DOM class and `localStorage`.
+- **Persistent Theme Preference**: User-selected appearance (System / Dark / Light) now persists in local storage across app restarts.
+
 ## [0.1.2] - 2026-09-10
 
 ### 🔔 Native Desktop Notification Bridge

@@ -17,15 +17,28 @@
 
   function setTheme(newTheme: AppTheme) {
     appState.setTheme(newTheme);
+    try {
+      localStorage.setItem('waplus_theme', newTheme);
+    } catch (_) {}
+
     if (newTheme === 'dark') {
+      document.documentElement.classList.add('theme-dark');
+      document.documentElement.classList.remove('theme-light');
       document.body.classList.add('theme-dark');
       document.body.classList.remove('theme-light');
     } else if (newTheme === 'light') {
+      document.documentElement.classList.add('theme-light');
+      document.documentElement.classList.remove('theme-dark');
       document.body.classList.add('theme-light');
       document.body.classList.remove('theme-dark');
     } else {
+      document.documentElement.classList.remove('theme-dark', 'theme-light');
       document.body.classList.remove('theme-dark', 'theme-light');
     }
+
+    invoke('set_theme', { theme: newTheme }).catch((err) => {
+      console.warn('Failed to apply theme to desktop shell:', err);
+    });
   }
 
   async function handleClearSession() {
